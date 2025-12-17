@@ -9,12 +9,11 @@ app.use(cors());
 app.use(express.json());
 
 const pool = new Pool({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-  port: 5432,
-  ssl: { rejectUnauthorized: false }
+  connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false },
+  max: 1,                 // 🔴 quan trọng
+  idleTimeoutMillis: 0,   // 🔴 quan trọng
+  connectionTimeoutMillis: 0
 });
 
 app.get("/", (req, res) => {
@@ -23,15 +22,13 @@ app.get("/", (req, res) => {
 
 app.get("/api/students", async (req, res) => {
   try {
-    const result = await pool.query("SELECT * FROM students");
+    const result = await pool.query("select * from students");
     res.json(result.rows);
   } catch (err) {
-    console.error(err); // 👈 log đầy đủ
-    res.status(500).json({
-      error: err.message || "Unknown database error"
-    });
+    console.error("DB ERROR:", err);
+    res.status(500).json({ error: err.message });
   }
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log("Server running"));
+app.listen(PORT, () => console.log("Server running on", PORT));
