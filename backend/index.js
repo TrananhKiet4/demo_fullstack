@@ -26,7 +26,10 @@ app.get("/api/students", async (req, res) => {
     const result = await pool.query("SELECT * FROM students");
     res.json(result.rows);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error(err); // 👈 log đầy đủ
+    res.status(500).json({
+      error: err.message || "Unknown database error"
+    });
   }
 });
 
