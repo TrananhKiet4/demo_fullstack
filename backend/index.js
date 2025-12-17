@@ -11,9 +11,12 @@ app.use(express.json());
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: { rejectUnauthorized: false },
-  max: 1,                 // 🔴 quan trọng
-  idleTimeoutMillis: 0,   // 🔴 quan trọng
-  connectionTimeoutMillis: 0
+
+  // 🔴 CỰC KỲ QUAN TRỌNG cho Supabase pooler
+  max: 1,
+  min: 0,
+  idleTimeoutMillis: 10000,
+  connectionTimeoutMillis: 10000
 });
 
 app.get("/", (req, res) => {
@@ -25,8 +28,11 @@ app.get("/api/students", async (req, res) => {
     const result = await pool.query("select * from students");
     res.json(result.rows);
   } catch (err) {
-    console.error("DB ERROR:", err);
-    res.status(500).json({ error: err.message });
+    console.error("FULL DB ERROR:", err);
+    res.status(500).json({
+      error: err.message || "Unknown database error",
+      code: err.code
+    });
   }
 });
 
