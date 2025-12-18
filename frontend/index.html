@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Students CRUD</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <h1>🎓 Student Management</h1>
+
+  <form id="studentForm">
+    <input type="hidden" id="id">
+    <input id="name" placeholder="Tên" required>
+    <input id="age" type="number" placeholder="Tuổi" required>
+    <input id="email" type="email" placeholder="Email" required>
+    <button>Lưu</button>
+  </form>
+
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Tên</th>
+        <th>Tuổi</th>
+        <th>Email</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody id="table"></tbody>
+  </table>
+
+  <script src="script.js"></script>
+</body>
+
+</html>
