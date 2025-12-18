@@ -1,114 +1,55 @@
-<!DOCTYPE html>
-<html lang="vi">
+<script>
+  const API = "/api/students";
 
-<head>
-  <meta charset="UTF-8" />
-  <title>Student Management</title>
-  <style>
-    body {
-      font-family: Arial;
-      padding: 30px;
-    }
+  // ✅ KHAI BÁO TRƯỚC
+  const nameInput = document.getElementById("name");
+  const ageInput = document.getElementById("age");
+  const emailInput = document.getElementById("email");
+  const tbody = document.getElementById("students");
 
-    input {
-      margin: 5px;
-      padding: 5px;
-    }
+  document.addEventListener("DOMContentLoaded", loadStudents);
 
-    button {
-      padding: 5px 10px;
-    }
+  async function loadStudents() {
+    const res = await fetch(API);
+    const data = await res.json();
 
-    table {
-      border-collapse: collapse;
-      margin-top: 20px;
-    }
+    tbody.innerHTML = "";
 
-    th,
-    td {
-      border: 1px solid #ccc;
-      padding: 8px;
-    }
-  </style>
-</head>
+    data.forEach(s => {
+      tbody.innerHTML += `
+        <tr>
+          <td>${s.id}</td>
+          <td>${s.name}</td>
+          <td>${s.age}</td>
+          <td>${s.email}</td>
+          <td>
+            <button onclick="del(${s.id})">❌</button>
+          </td>
+        </tr>
+      `;
+    });
+  }
 
-<body>
+  async function addStudent() {
+    await fetch(API, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: nameInput.value,
+        age: ageInput.value,
+        email: emailInput.value
+      })
+    });
 
-  <h1>🎓 Student Management</h1>
+    nameInput.value = "";
+    ageInput.value = "";
+    emailInput.value = "";
 
-  <input id="name" placeholder="Tên">
-  <input id="age" placeholder="Tuổi" type="number">
-  <input id="email" placeholder="Email">
-  <button onclick="addStudent()">Lưu</button>
+    loadStudents();
+  }
 
-  <table>
-    <thead>
-      <tr>
-        <th>ID</th>
-        <th>Tên</th>
-        <th>Tuổi</th>
-        <th>Email</th>
-        <th>Action</th>
-      </tr>
-    </thead>
-    <tbody id="students"></tbody>
-  </table>
-
-  <script>
-    const API = "/api/students"; // 👈 QUAN TRỌNG
-
-    document.addEventListener("DOMContentLoaded", loadStudents);
-
-    async function loadStudents() {
-      const res = await fetch(API);
-      const data = await res.json();
-
-      const tbody = document.getElementById("students");
-      tbody.innerHTML = "";
-
-      data.forEach(s => {
-        tbody.innerHTML += `
-      <tr>
-        <td>${s.id}</td>
-        <td>${s.name}</td>
-        <td>${s.age}</td>
-        <td>${s.email}</td>
-        <td>
-          <button onclick="del(${s.id})">❌</button>
-        </td>
-      </tr>
-    `;
-      });
-    }
-
-    async function addStudent() {
-      const name = nameInput.value;
-      const age = ageInput.value;
-      const email = emailInput.value;
-
-      await fetch(API, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, age, email })
-      });
-
-      nameInput.value = "";
-      ageInput.value = "";
-      emailInput.value = "";
-
-      loadStudents();
-    }
-
-    async function del(id) {
-      await fetch(API + "/" + id, { method: "DELETE" });
-      loadStudents();
-    }
-
-    const nameInput = document.getElementById("name");
-    const ageInput = document.getElementById("age");
-    const emailInput = document.getElementById("email");
-  </script>
-
-</body>
-
-</html>
+  async function del(id) {
+    await fetch(API + "/" + id, { method: "DELETE" });
+    loadStudents();
+  }
+</script>
