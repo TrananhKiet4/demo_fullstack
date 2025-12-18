@@ -1,35 +1,39 @@
 import express from "express";
-import pkg from "pg";
 import cors from "cors";
+import pkg from "pg";
+import path from "path";
+import { fileURLToPath } from "url";
 
 const { Pool } = pkg;
 const app = express();
 
+// fix __dirname cho ES module
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 app.use(cors());
 app.use(express.json());
-app.use(express.static("frontend"));
 
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL
+// 👉 SERVE FRONTEND
+app.use(express.static(path.join(__dirname, "../frontend")));
+
+// 👉 ROOT
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "../frontend/index.html"));
 });
 
+// ===== DATABASE =====
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false }
+});
+
+// ===== API =====
 app.get("/api/students", async (req, res) => {
   const { rows } = await pool.query("SELECT * FROM students ORDER BY id");
   res.json(rows);
 });
 
-app.post("/api/students", async (req, res) => {
-  const { name, age, email } = req.body;
-  const { rows } = await pool.query(
-    "INSERT INTO students (name, age, email) VALUES ($1,$2,$3) RETURNING *",
-    [name, age, email]
-  );
-  res.json(rows[0]);
-});
-
-app.delete("/api/students/:id", async (req, res) => {
-  await pool.query("DELETE FROM students WHERE id=$1", [req.params.id]);
-  res.json({ message: "Deleted" });
-});
-
-app.listen(3000, () => console.log("Backend running on 3000"));
+// ===== START =====
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log("Server running on " + PORT));
