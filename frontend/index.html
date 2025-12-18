@@ -2,22 +2,44 @@
 <html lang="vi">
 
 <head>
-  <meta charset="UTF-8">
-  <title>Students CRUD</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <title>Student Management</title>
+  <style>
+    body {
+      font-family: Arial;
+      padding: 30px;
+    }
+
+    input {
+      margin: 5px;
+      padding: 5px;
+    }
+
+    button {
+      padding: 5px 10px;
+    }
+
+    table {
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    th,
+    td {
+      border: 1px solid #ccc;
+      padding: 8px;
+    }
+  </style>
 </head>
 
 <body>
 
   <h1>🎓 Student Management</h1>
 
-  <form id="studentForm">
-    <input type="hidden" id="id">
-    <input id="name" placeholder="Tên" required>
-    <input id="age" type="number" placeholder="Tuổi" required>
-    <input id="email" type="email" placeholder="Email" required>
-    <button>Lưu</button>
-  </form>
+  <input id="name" placeholder="Tên">
+  <input id="age" placeholder="Tuổi" type="number">
+  <input id="email" placeholder="Email">
+  <button onclick="addStudent()">Lưu</button>
 
   <table>
     <thead>
@@ -29,10 +51,64 @@
         <th>Action</th>
       </tr>
     </thead>
-    <tbody id="table"></tbody>
+    <tbody id="students"></tbody>
   </table>
 
-  <script src="script.js"></script>
+  <script>
+    const API = "/api/students"; // 👈 QUAN TRỌNG
+
+    document.addEventListener("DOMContentLoaded", loadStudents);
+
+    async function loadStudents() {
+      const res = await fetch(API);
+      const data = await res.json();
+
+      const tbody = document.getElementById("students");
+      tbody.innerHTML = "";
+
+      data.forEach(s => {
+        tbody.innerHTML += `
+      <tr>
+        <td>${s.id}</td>
+        <td>${s.name}</td>
+        <td>${s.age}</td>
+        <td>${s.email}</td>
+        <td>
+          <button onclick="del(${s.id})">❌</button>
+        </td>
+      </tr>
+    `;
+      });
+    }
+
+    async function addStudent() {
+      const name = nameInput.value;
+      const age = ageInput.value;
+      const email = emailInput.value;
+
+      await fetch(API, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, age, email })
+      });
+
+      nameInput.value = "";
+      ageInput.value = "";
+      emailInput.value = "";
+
+      loadStudents();
+    }
+
+    async function del(id) {
+      await fetch(API + "/" + id, { method: "DELETE" });
+      loadStudents();
+    }
+
+    const nameInput = document.getElementById("name");
+    const ageInput = document.getElementById("age");
+    const emailInput = document.getElementById("email");
+  </script>
+
 </body>
 
 </html>
